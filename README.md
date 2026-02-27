@@ -21,5 +21,8 @@ You find the last version of every code which is part of the thesis project:
 1) Typical single attempt retrieval with the glauber dynamics
 2) Montecarlo dynamics in order to check the order parameters state
 3) Selfconsistency equations solved through the regularized fixed point algorithm (for lambda = 0)
-4) 
-5) 
+4) Pattern correlation: evidences of the mixed state (montecarlo et glauber)
+5) Creation of a mixed state through 20 patterns and retrieval
+6) Coarse graining
+7) T vs alpha phase diagram
+8) Overlapping ensemble
