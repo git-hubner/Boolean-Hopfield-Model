@@ -21,7 +21,7 @@ Moreover, we suggest an analogy with the notion of **archetype** in Artificial N
 ## Codes
 
 You find the last version of every code which is part of the thesis project: 
----
+
 1) Typical single attempt retrieval with the glauber dynamics
 2) Montecarlo dynamics in order to check the order parameters state
 3) Selfconsistency equations solved through the regularized fixed point algorithm (for lambda = 0)
