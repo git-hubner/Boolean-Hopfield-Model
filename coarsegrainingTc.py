@@ -1,58 +1,56 @@
+"""Generate mixed patterns - build a simplified J-matrix where they're minima of f - coarse graining and retrieval attempts"""
+
 import numpy as np
 from scipy.stats import norm
 import matplotlib.pyplot as plt
 from datetime import datetime
 import os
 
-# ==================== PARAMETRI ====================
+# PARAMETERS
 N = 10000
 f = 0.1
 s_e = 0.7
 s_t = np.sqrt(1 - s_e**2)
 T_threshold = norm.ppf(1 - f)
-
-# Parametri simulazione
 theta = 0.6
 
-# RANGE DI PARAMETRI DA ESPLORARE
-lambda_values = np.linspace(0, 0.9, 10)  # 0, 0.1, 0.2, ..., 0.9
-alpha_values = np.linspace(0.2, 0.6, 9)  # 0.2, 0.25, 0.3, ..., 0.6
-n_realizations = 2  # Realizzazioni per ogni combinazione
+# PARAMS RANGE
+lambda_values = np.linspace(0, 0.9, 10) 
+alpha_values = np.linspace(0.2, 0.6, 9) 
+n_realizations = 2  
 
-# Parametri stati misti
-patterns_per_mixed = 20  # Numero di pattern da combinare per ogni stato misto
-sigma_gaussian = 10.0    # Sigma per pesi gaussiani
+# MIXED STATE PARAMS
+patterns_per_mixed = 20  # n° pattern in order to compose our mixed state
+sigma_gaussian = 10.0    # Sigma for gaussian weights (big so as to have a nice |mu-nu| function)
 
-# PARAMETRI PER RICERCA TRANSIZIONE
+# PARAMS IN ORDER TO CHECK THE PHASE TRANSITION
 T_initial_min = 0.001
 T_initial_max = 0.5
-n_sweep_mc = 30  # Sweep Monte Carlo per ogni temperatura
+n_sweep_mc = 30  # Sweep Monte Carlo for every temp
 
-# Crea cartella output
+# output directory
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 output_dir = f"hierarchical_phase_transition_{timestamp}"
 os.makedirs(output_dir, exist_ok=True)
 
 print("=" * 80)
-print(f"HIERARCHICAL SCAN: PHASE TRANSITION DETECTION")
 print("=" * 80)
 print(f"λ values: {len(lambda_values)} points from {lambda_values[0]:.2f} to {lambda_values[-1]:.2f}")
 print(f"α values: {len(alpha_values)} points from {alpha_values[0]:.2f} to {alpha_values[-1]:.2f}")
 print(f"Realizzazioni per combinazione: {n_realizations}")
-print(f"Mode: ADAPTIVE temperature search for phase transition")
 print(f"Output directory: {output_dir}/")
 print(f"Total runs: {len(lambda_values) * len(alpha_values) * n_realizations}")
 print("=" * 80)
 
-def prob(h, tht, beta):
-    with np.errstate(over='ignore'):
-        return 1/(1 + np.exp(-(h - tht) * beta))
+def prob(h, tht, beta): #glauber flipping prob
+    with np.errstate(over='ignore'): #overflow
+        return 1/(1 + np.exp(-(h - tht) * beta)) 
 
-def magn(Z, eta_p, f):
+def magn(Z, eta_p, f): #magnetization order parameter
     return np.dot(eta_p - f, Z) / ((1 - f) * np.sum(eta_p))
 
 def generate_patterns(P, N, lam, s_e, s_t, T_threshold):
-    """Genera i pattern originali con correlazione spaziale"""
+    """Generate patterns with spatial correlation - AR(1) PROCESSES"""
     eta = np.zeros((P, N))
     I_ep = np.random.normal(0, s_e, size=(P, N))
     I_t = np.zeros((P, N))
@@ -69,7 +67,7 @@ def generate_patterns(P, N, lam, s_e, s_t, T_threshold):
     return eta
 
 def build_J_matrix(eta, f, N):
-    """Costruisce la matrice J standard"""
+    """Builds the synaptic matrix"""
     P_eff = eta.shape[0]
     eta_centered = eta - f
     J = np.dot(eta_centered.T, eta_centered) / (f * (1 - f) * N)
@@ -77,7 +75,7 @@ def build_J_matrix(eta, f, N):
     return J
 
 def make_weighted_mixed_pattern(eta, start, end, center=None, sigma=10.0, f=0.1):
-    """Crea un singolo pattern misto da eta[start:end+1] con pesi gaussiani"""
+    """Builds the mixed pattern from the old ones"""
     P, N = eta.shape
     pattern_indices = list(range(start, end+1))
     L = len(pattern_indices)
@@ -102,7 +100,7 @@ def make_weighted_mixed_pattern(eta, start, end, center=None, sigma=10.0, f=0.1)
     return M_bin, w
 
 def create_all_mixed_patterns(eta, patterns_per_mixed, f, sigma):
-    """Crea P/patterns_per_mixed stati misti"""
+    """generate P/patterns_per_mixed mixed states (naive case P/20)"""
     P, N = eta.shape
     n_mixed = P // patterns_per_mixed
     
@@ -125,7 +123,7 @@ def create_all_mixed_patterns(eta, patterns_per_mixed, f, sigma):
     return eta_new, n_mixed
 
 def run_dynamics_at_temperature(W_init, J, target_pattern, f, theta, T, n_sweeps=30):
-    """Esegue dinamica Monte Carlo a temperatura fissata"""
+    """Monte Carlo dynamics for every T"""
     W = W_init.copy()
     
     for _ in range(n_sweeps):
@@ -146,18 +144,8 @@ def find_phase_transition(J, target_pattern, f, theta,
                           T_min=0.001, T_max=0.5, 
                           threshold_high=0.7, threshold_low=0.3,
                           max_iterations=15, n_sweeps=30):
-    """
-    Ricerca adattiva della transizione di fase usando bisection.
     
-    Returns:
-    - T_c: temperatura critica (dove m_target ≈ 0.5)
-    - m_high: magnetizzazione a T bassa (retrieval buono)
-    - m_low: magnetizzazione a T alta (retrieval cattivo)
-    - T_values: temperature testate
-    - m_values: magnetizzazioni corrispondenti
-    """
-    
-    # Stato iniziale con rumore
+    # corrupted initial state
     W_init = target_pattern.copy()
     flip_idx = np.random.choice(N, size=N//30, replace=False)
     W_init[flip_idx] = 1 - W_init[flip_idx]
@@ -165,7 +153,7 @@ def find_phase_transition(J, target_pattern, f, theta,
     T_values = []
     m_values = []
     
-    # Test estremi
+    # Test at high and low T
     m_low_temp, _ = run_dynamics_at_temperature(W_init, J, target_pattern, f, theta, T_min, n_sweeps)
     T_values.append(T_min)
     m_values.append(m_low_temp)
@@ -174,12 +162,11 @@ def find_phase_transition(J, target_pattern, f, theta,
     T_values.append(T_max)
     m_values.append(m_high_temp)
     
-    # Se non c'è transizione, ritorna subito
+    # if no transition 
     if m_low_temp < threshold_high or m_high_temp > threshold_low:
-        # Nessuna transizione chiara
         return None, m_low_temp, m_high_temp, T_values, m_values
     
-    # Bisection per trovare T_c
+    # Bisection in order to find T_c
     T_left = T_min
     T_right = T_max
     m_left = m_low_temp
@@ -192,9 +179,9 @@ def find_phase_transition(J, target_pattern, f, theta,
         T_values.append(T_mid)
         m_values.append(m_mid)
         
-        # Check convergenza
+        # Convergence check
         if abs(m_mid - 0.5) < 0.05 or (T_right - T_left) < 0.005:
-            # Trovata transizione
+            # PT
             T_c = T_mid
             return T_c, m_left, m_right, T_values, m_values
         
@@ -206,12 +193,12 @@ def find_phase_transition(J, target_pattern, f, theta,
             T_right = T_mid
             m_right = m_mid
     
-    # Max iterations raggiunto
+    # Max iterations
     T_c = (T_left + T_right) / 2
     return T_c, m_left, m_right, T_values, m_values
 
 def run_single_realization(lam, alpha, realization_idx, output_dir):
-    """Esegue una singola realizzazione per dati λ e α"""
+    """run_single_realization for every λ and α"""
     
     P = int(alpha * N)
     
