@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 
 # ==================== PARAMETRI ====================
-DEBUG_MODE = True  # Cambia a False per simulazione completa
+DEBUG_MODE = True  
 
 if DEBUG_MODE:
     print("⚠️  MODALITÀ DEBUG ATTIVA")
@@ -13,7 +13,7 @@ if DEBUG_MODE:
     alpha_values = [0.05, 0.1]
     lambda_values = [0.7, 0.8]
     T_range = np.linspace(0.001, 0.5, 20)
-    n_eigenvectors = 10  # Numero autovettori da analizzare
+    n_eigenvectors = 10 
 else:
     N = 10000
     alpha_values = [0.05, 0.1, 0.2]
@@ -74,16 +74,11 @@ def binarize_eigenvector_fixed_activity(v, target_activity=0.1):
     return binary_state
 
 def magnetization(W, pattern, f):
-    """
-    Calcola la magnetizzazione dello stato W rispetto al pattern.
-    m = <(ξ - f) · W> / ((1-f) * Σξ)
-    """
+
     return np.dot(pattern - f, W) / ((1 - f) * np.sum(pattern))
 
 def retrieve_from_state(J, initial_state, T, theta, f, N, n_mc_steps):
-    """
-    Esegue retrieval partendo da uno stato iniziale generico
-    """
+  
     W = initial_state.copy()
     
     for _ in range(n_mc_steps):
@@ -101,7 +96,7 @@ def activity(W):
     """Frazione neuroni attivi"""
     return np.sum(W) / len(W)
 
-# Inizializza file output
+
 with open(output_filename, 'w') as outfile:
     outfile.write("=" * 120 + "\n")
     outfile.write("EIGENVECTOR RETRIEVAL ANALYSIS - MAGNETIZATION vs TEMPERATURE\n")
@@ -151,8 +146,8 @@ for lam in lambda_values:
         eigenvalues = eigenvalues[idx]
         eigenvectors = eigenvectors[:, idx]
         
-        print(f"     ✓ Autovalori range: [{eigenvalues[-1]:.4f}, {eigenvalues[0]:.4f}]")
-        print(f"     ✓ Top 5 autovalori: {eigenvalues[:5]}")
+        print(f"      Autovalori range: [{eigenvalues[-1]:.4f}, {eigenvalues[0]:.4f}]")
+        print(f"      Top 5 autovalori: {eigenvalues[:5]}")
         
         # Binarizza i primi n_eigenvectors autovettori con attività fissa al 10%
         print(f"  3. Binarizzazione top {n_eigenvectors} autovettori (attività = {f})...")
@@ -176,7 +171,7 @@ for lam in lambda_values:
             'q_0': {i: [] for i in range(n_eigenvectors)}
         }
         
-        # Scrivi info nel file
+
         with open(output_filename, 'a') as outfile:
             outfile.write(f"\nLAMBDA = {lam:.3f}, ALPHA = {alpha:.3f}\n")
             outfile.write("-" * 120 + "\n")
@@ -190,7 +185,7 @@ for lam in lambda_values:
             outfile.write("\n")
             outfile.write("-" * 120 + "\n")
         
-        # Loop su temperature
+        # Loop
         print(f"  4. Retrieval su autovettori a diverse temperature...")
         for t_idx, t in enumerate(T_range):
             if (t_idx + 1) % 5 == 0:
@@ -199,7 +194,7 @@ for lam in lambda_values:
             results['T'].append(t)
             line_data = f"{t:10.6f}"
             
-            # Esegui retrieval per ogni autovettore
+            # retrieval per ogni autovettore
             for i in range(n_eigenvectors):
                 # Aggiungi noise all'autovettore binarizzato
                 initial_state = eigen_states[i].copy()
@@ -210,11 +205,11 @@ for lam in lambda_values:
                 # Retrieval
                 W = retrieve_from_state(J, initial_state, t, theta, f, N, n_mc_steps)
                 
-                # MAGNETIZZAZIONE rispetto all'autovettore originale
+                # magnetizzazione rispetto all'autovettore originale
                 m = magnetization(W, eigen_states[i], f)
                 results['magnetizations'][i].append(m)
                 
-                # ATTIVITÀ q_0
+                # attività q_0
                 q0 = activity(W)
                 results['q_0'][i].append(q0)
                 
@@ -396,14 +391,7 @@ for lam in lambda_values:
         plt.show()
         print(f"✓ Salvato: combined_lambda{lam:.2f}_alpha{alpha:.2f}_{timestamp}.png")
 
-print("\n" + "=" * 80)
-print("ANALISI COMPLETATA!")
 print("=" * 80)
 print(f"✓ File dati: {output_filename}")
 print(f"✓ Plot generati per {len(lambda_values)} λ × {len(alpha_values)} α")
-print("\nINTERPRETAZIONE:")
-print("- m alto a T bassa → autovettore = attrattore stabile")
-print("- m scende con T → transizione di fase")
-print("- q_0 ≈ f → rete mantiene attività corretta")
-print("- Autovalori grandi → attrattori più forti")
 print("=" * 80)
