@@ -18,6 +18,9 @@ Finally, we compare the overlapping ensemble at λ>0.65, i.e. the number of neur
 We suggest the model is a good candidate for encoding episodic memories of subsequent events togheter, i.e. **overlapping engrams**. 
 Moreover, we suggest an analogy with the notion of **archetype** in Artificial Neural Networks .
 
+## Model
+We refer to model.md for an outline of the model
+
 ## Codes
 
 You find the last version of every code which is part of the thesis project: 
