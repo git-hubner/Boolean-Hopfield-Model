@@ -209,10 +209,10 @@ def run_single_realization(lam, alpha, realization_idx, output_dir):
     print(f"\n  → λ={lam:.2f}, α={alpha:.2f}, Real={realization_idx+1}")
     print(f"     P = {P}", end='')
     
-    # Genera pattern originali
+    # Generate original patterns
     eta_original = generate_patterns(P, N, lam, s_e, s_t, T_threshold)
     
-    # Crea stati misti
+    # Create mixed states
     eta_new, P_new = create_all_mixed_patterns(
         eta_original, patterns_per_mixed, f, sigma_gaussian
     )
@@ -223,14 +223,14 @@ def run_single_realization(lam, alpha, realization_idx, output_dir):
     
     print(f" → P_new = {P_new}", end='')
     
-    # Costruisci J_new
+    # Build J_new
     J_new = build_J_matrix(eta_new, f, N)
     
     # Target
     target_mixed_idx = P_new // 2
     target_mixed_pattern = eta_new[target_mixed_idx].copy()
     
-    # TROVA TRANSIZIONE DI FASE
+    # find PT(phase transition)
     T_c, m_high, m_low, T_tested, m_tested = find_phase_transition(
         J_new, target_mixed_pattern, f, theta,
         T_min=T_initial_min, T_max=T_initial_max,
@@ -243,7 +243,7 @@ def run_single_realization(lam, alpha, realization_idx, output_dir):
     else:
         print(f" → T_c={T_c:.4f}, m_high={m_high:.3f}, m_low={m_low:.3f}")
     
-    # Storage risultati
+    # Storage results
     results = {
         'P_original': P,
         'P_new': P_new,
@@ -256,7 +256,7 @@ def run_single_realization(lam, alpha, realization_idx, output_dir):
         'n_evaluations': len(T_tested)
     }
     
-    # Salva file con curve complete
+    # save file
     base_name = f"lambda{lam:.2f}_alpha{alpha:.2f}_real{realization_idx}"
     
     output_filename = os.path.join(output_dir, f"{base_name}.txt")
@@ -276,12 +276,12 @@ def run_single_realization(lam, alpha, realization_idx, output_dir):
         outfile.write(f"{'T':>12} {'m_target':>12}\n")
         outfile.write("-" * 100 + "\n")
         
-        # Ordina per temperatura
+        # orders idx in temperature
         sorted_idx = np.argsort(T_tested)
         for idx in sorted_idx:
             outfile.write(f"{T_tested[idx]:12.6f} {m_tested[idx]:12.6f}\n")
     
-    # Plot individuale
+    # Plot individ
     if len(T_tested) > 2:
         fig, ax = plt.subplots(figsize=(10, 7))
         
@@ -315,8 +315,8 @@ def run_single_realization(lam, alpha, realization_idx, output_dir):
     
     return results
 
-# ==================== MAIN LOOP ====================
-print("\nInizio scan parametri...\n")
+#  MAIN LOOP
+print("\Starting to scan parameters...\n")
 
 total_runs = len(lambda_values) * len(alpha_values) * n_realizations
 current_run = 0
@@ -340,11 +340,11 @@ for lam in lambda_values:
                 })
 
 print("\n" + "=" * 80)
-print("GENERAZIONE PLOT AGGREGATI")
+print("AGGREGATE PLOTS:")
 print("=" * 80)
 
 # ==================== PLOT 1: Heatmap T_c vs λ,α ====================
-print("Generazione plot 1: Heatmap T_c...")
+print("Generate plot 1: Heatmap T_c...")
 
 lambda_grid = np.array(lambda_values)
 alpha_grid = np.array(alpha_values)
@@ -373,7 +373,7 @@ im = ax.imshow(T_c_grid, aspect='auto', origin='lower',
                       alpha_grid[0], alpha_grid[-1]],
                interpolation='bilinear')
 
-# Contorni
+# Contours
 mask = ~np.isnan(T_c_grid)
 if np.any(mask):
     contours = ax.contour(lambda_grid, alpha_grid, T_c_grid,
@@ -393,7 +393,7 @@ plt.tight_layout()
 plt.savefig(os.path.join(output_dir, 'heatmap_Tc.png'), 
            dpi=150, bbox_inches='tight')
 plt.close()
-print("✓ Salvato: heatmap_Tc.png")
+print("✓ Saved: heatmap_Tc.png")
 
 # ==================== PLOT 2: Heatmap m_high vs λ,α ====================
 print("Generazione plot 2: Heatmap m_high...")
@@ -438,10 +438,10 @@ plt.tight_layout()
 plt.savefig(os.path.join(output_dir, 'heatmap_mhigh.png'), 
            dpi=150, bbox_inches='tight')
 plt.close()
-print("✓ Salvato: heatmap_mhigh.png")
+print("✓ Saved: heatmap_mhigh.png")
 
 # ==================== PLOT 3: T_c e n_evaluations vs λ ====================
-print("Generazione plot 3: T_c vs λ...")
+print("Plot 3: T_c vs λ...")
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 7))
 
@@ -489,10 +489,10 @@ plt.tight_layout()
 plt.savefig(os.path.join(output_dir, 'Tc_and_efficiency.png'),
            dpi=150, bbox_inches='tight')
 plt.close()
-print("✓ Salvato: Tc_and_efficiency.png")
+print("✓ Saved: Tc_and_efficiency.png")
 
 # ==================== SUMMARY ====================
-print("\nGenerazione file summary...")
+print("\nGenerate file summary...")
 
 summary_filename = os.path.join(output_dir, 'summary.txt')
 with open(summary_filename, 'w') as f:
