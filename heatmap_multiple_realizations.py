@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 from numba import jit
 from datetime import datetime
 
-# ==================== OPZIONI ====================
-DEBUG_MODE = True  # Cambia a True per test rapidi
-N_REALIZATIONS = 3 if not DEBUG_MODE else 2  # Numero di realizzazioni per ogni (λ, α)
+# ==================== DEBUG ====================
+DEBUG_MODE = True  
+N_REALIZATIONS = 3 if not DEBUG_MODE else 2  
 
 if DEBUG_MODE:
-    print("⚠️  MODALITÀ DEBUG ATTIVA")
+    print(" MODALITÀ DEBUG ATTIVA")
     N = 10000
     alpha_values = np.linspace(0.05, 0.05, 1)
     lambda_values = np.linspace(0.75, 0.75, 1)
@@ -38,7 +38,7 @@ output_filename = f"heatmap_Tc_multi_real_{timestamp}.txt"
 
 @jit(nopython=True)
 def monte_carlo_dynamics(J, Z, theta, f, beta, n_steps, N):
-    """Dinamica Monte Carlo ottimizzata con Numba"""
+    """Dinamica Monte Carlo ottimizzata """
     for step in range(n_steps):
         for i in range(N):
             h = np.dot(J[i], Z)
@@ -50,7 +50,7 @@ def monte_carlo_dynamics(J, Z, theta, f, beta, n_steps, N):
     return Z
 
 def generate_patterns(P, N, lam, s_e, s_t, T_threshold):
-    """Genera i pattern in modo vettorializzato"""
+    """Genera i pattern vettorializzati"""
     eta = np.zeros((P, N))
     I_ep = np.random.normal(0, s_e, size=(P, N))
     I_t = np.zeros((P, N))
@@ -66,18 +66,14 @@ def generate_patterns(P, N, lam, s_e, s_t, T_threshold):
     return eta
 
 def build_J_matrix(eta, f, N):
-    """Costruisce la matrice J in modo vettorializzato"""
+    """Costruisce la matrice J vettorializzata"""
     eta_centered = eta - f
     J = np.dot(eta_centered.T, eta_centered) / (f * (1 - f) * N)
     np.fill_diagonal(J, 0)
     return J
 
 def find_transitions(J, eta0, theta, f, N, T_range, n_mc_steps):
-    """
-    Trova le temperature critiche:
-    - T_c1: prima transizione (retrieval → spin glass, m: 0.9→0.5 o m>0.1→m<0.1)
-    - T_c2: seconda transizione (spin glass → paramagnetic, m: 0.5→0, solo per λ>0.7)
-    """
+
     Z = eta0.copy()
     flip_idx = np.random.choice(N, size=max(1, N//30), replace=False)
     Z[flip_idx] = 1 - Z[flip_idx]
@@ -97,8 +93,8 @@ def find_transitions(J, eta0, theta, f, N, T_range, n_mc_steps):
     T_c1 = None
     T_c2 = None
     
-    # PRIMA TRANSIZIONE: retrieval → spin glass
-    # Cerca dove m scende sotto 0.1 (standard) O dove scende da >0.7 a <0.5
+    # PRIMA TRANSIZIONE: retrieval → mixed state
+    # Cerca dove m scende sotto 0.1 (standard) o dove scende da >0.7 a <0.5
     in_high = False
     for idx in range(len(m_vals)):
         if m_vals[idx] > 0.7:
@@ -117,7 +113,7 @@ def find_transitions(J, eta0, theta, f, N, T_range, n_mc_steps):
                 T_c1 = T_range[idx]
                 break
     
-    # SECONDA TRANSIZIONE: spin glass → paramagnetic (solo se T_c1 trovata)
+    # SECONDA TRANSIZIONE: mixed state → paramagnetic (solo se T_c1 trovata)
     # Cerca dove m scende da ~0.5 a ~0 (sotto 0.05)
     if T_c1 is not None:
         # Parti da dopo la prima transizione
@@ -125,7 +121,7 @@ def find_transitions(J, eta0, theta, f, N, T_range, n_mc_steps):
         in_sg = False
         for idx in range(start_idx, len(m_vals)):
 
-            if 0.2 < m_vals[idx] < 0.4:  # Fase spin glass
+            if 0.2 < m_vals[idx] < 0.4:  # Fase mixed state
                 in_sg = True
             elif in_sg and m_vals[idx] < 0.1:  # Transizione a paramagnetic
                 T_c2 = T_range[idx]
@@ -160,7 +156,7 @@ print("=" * 80)
 print("HEATMAP λ vs α - MULTIPLE REALIZZAZIONI")
 print("=" * 80)
 if DEBUG_MODE:
-    print("⚠️  MODALITÀ DEBUG ATTIVA")
+    print(" MODALITÀ DEBUG ATTIVA")
 print(f"N = {N}, Realizzazioni per punto: {N_REALIZATIONS}")
 print(f"Alpha: {len(alpha_values)} punti")
 print(f"Lambda: {len(lambda_values)} punti")
@@ -181,14 +177,13 @@ sim_count = 0
 success_tc1 = 0
 success_tc2 = 0
 
-# Scrivi header tabella
 with open(output_filename, 'a') as outfile:
     outfile.write("RESULTS:\n")
     outfile.write("-" * 120 + "\n")
     outfile.write(f"{'alpha':>8} {'lambda':>8} {'Real':>5} {'T_c1':>12} {'T_c2':>12} {'status':>25}\n")
     outfile.write("-" * 120 + "\n")
 
-# Loop principale
+# Loop 
 for i, lam in enumerate(lambda_values):
     for j, alpha in enumerate(alpha_values):
         P = int(alpha * N)
@@ -210,7 +205,7 @@ for i, lam in enumerate(lambda_values):
                 print(f"[{sim_count:4d}/{total_sims}] ({progress:5.1f}%) | "
                       f"λ={lam:.3f}, α={alpha:.3f}, real={real+1}/{N_REALIZATIONS}", end="")
             
-            # Genera pattern e matrice J (nuova realizzazione)
+            # Genera pattern e matrice J 
             eta = generate_patterns(P, N, lam, s_e, s_t, T_threshold)
             J = build_J_matrix(eta, f, N)
             
@@ -282,7 +277,6 @@ print(f"Prima transizione trovata: {success_tc1}/{total_sims} ({100*success_tc1/
 print(f"Seconda transizione trovata: {success_tc2}/{total_sims} ({100*success_tc2/total_sims:.1f}%)")
 print("=" * 80)
 
-# Scrivi statistiche
 with open(output_filename, 'a') as outfile:
     outfile.write("\n" + "=" * 120 + "\n")
     outfile.write("STATISTICS:\n")
