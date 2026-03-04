@@ -37,10 +37,10 @@ $$
 i.e., the covariance matrix introduced by Tsodyks and Feigel'man [1988].
 
 The network is described by four parameters:
-- $f$: coding level;
+- f: coding level;
 - one of the two variances, $\sigma_e$ or $\sigma_t$ (since the sum of their squares is equal to 1);
 - $\lambda$: the correlation between subsequent time inputs;
-- $P$: the number of stored episodes.
+- P: the number of stored episodes.
 
 The correlation parameter $\lambda = 1 - \frac{a}{N}$ where:
 - if $a \sim O(1)$, we have a correlation time of order $N$;
