@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 from numba import jit
 from datetime import datetime
 
-# ==================== OPZIONI DEBUG ====================
-DEBUG_MODE = False  # Cambia a True per test rapidi
+# ==================== DEBUG ====================
+DEBUG_MODE = False 
 
 if DEBUG_MODE:
-    print("⚠️  MODALITÀ DEBUG ATTIVA - Pochi punti per test rapido")
+    print(" MODALITÀ DEBUG ATTIVA ")
     N = 5000
     alpha_values = np.linspace(0.05, 0.5, 5)
     lambda_values = np.linspace(0.0, 0.9, 6)
@@ -21,7 +21,7 @@ else:
     T_range = np.linspace(0.001, 0.25, 30)
     n_mc_steps = 35
 
-# Parametri fissi
+# Parametri 
 f = 0.1
 s_e = 0.7
 s_t = np.sqrt(1 - s_e**2)
@@ -34,7 +34,7 @@ output_filename = f"heatmap_Tc_lambda_alpha_{timestamp}.txt"
 
 @jit(nopython=True)
 def monte_carlo_dynamics(J, Z, theta, f, beta, n_steps, N):
-    """Dinamica Monte Carlo ottimizzata con Numba"""
+    """Dinamica Monte Carlo ottimizzata"""
     for step in range(n_steps):
         for i in range(N):
             h = np.dot(J[i], Z)
@@ -46,7 +46,7 @@ def monte_carlo_dynamics(J, Z, theta, f, beta, n_steps, N):
     return Z
 
 def generate_patterns(P, N, lam, s_e, s_t, T_threshold):
-    """Genera i pattern in modo vettorializzato"""
+    """Genera i pattern vettorializzati"""
     eta = np.zeros((P, N))
     I_ep = np.random.normal(0, s_e, size=(P, N))
     I_t = np.zeros((P, N))
@@ -62,14 +62,14 @@ def generate_patterns(P, N, lam, s_e, s_t, T_threshold):
     return eta
 
 def build_J_matrix(eta, f, N):
-    """Costruisce la matrice J in modo vettorializzato"""
+    """Costruisce la matrice J vettorializzata"""
     eta_centered = eta - f
     J = np.dot(eta_centered.T, eta_centered) / (f * (1 - f) * N)
     np.fill_diagonal(J, 0)
     return J
 
 def find_critical_temperature(J, eta0, theta, f, N, T_range, n_mc_steps):
-    """Trova la temperatura critica con controlli"""
+    """Trova la temperatura critica"""
     Z = eta0.copy()
     flip_idx = np.random.choice(N, size=max(1, N//30), replace=False)
     Z[flip_idx] = 1 - Z[flip_idx]
@@ -119,7 +119,7 @@ print("=" * 80)
 print("HEATMAP λ vs α - TEMPERATURA CRITICA")
 print("=" * 80)
 if DEBUG_MODE:
-    print("⚠️  MODALITÀ DEBUG ATTIVA")
+    print(" MODALITÀ DEBUG ATTIVA")
 print(f"N = {N}")
 print(f"Alpha: {len(alpha_values)} punti da {alpha_values[0]:.2f} a {alpha_values[-1]:.2f}")
 print(f"Lambda: {len(lambda_values)} punti da {lambda_values[0]:.2f} a {lambda_values[-1]:.2f}")
@@ -134,7 +134,6 @@ total_sims = len(alpha_values) * len(lambda_values)
 sim_count = 0
 success_count = 0
 
-# Scrivi header tabella nel file
 with open(output_filename, 'a') as outfile:
     outfile.write("RESULTS TABLE:\n")
     outfile.write("-" * 100 + "\n")
@@ -217,7 +216,7 @@ im = ax.imshow(T_c_matrix, aspect='auto', origin='lower', cmap='RdYlBu_r',
                       lambda_values.min(), lambda_values.max()],
                interpolation='nearest')
 
-# Aggiungi contorni se ci sono abbastanza dati
+# Aggiungi contorni
 if success_count > 10:
     # Crea versione interpolata per contorni smooth
     from scipy.ndimage import gaussian_filter
