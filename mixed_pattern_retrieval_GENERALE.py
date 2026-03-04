@@ -1,3 +1,5 @@
+"""Generate a mixed state and try to recover it starting from a corrupted version of it (lambda>0.6)"""
+
 import numpy as np
 from scipy.stats import norm
 import matplotlib.pyplot as plt
@@ -201,7 +203,6 @@ def run_single_realization(lam, alpha, realization_idx, output_dir):
         # Calcola profilo spaziale completo
         spatial_profile = [magn(W, eta[k], f) for k in pattern_range]
         
-        # Salva risultati
         results['T'].append(t)
         results['m_mix'].append(m_mix)
         results['m_99'].append(m_99)
