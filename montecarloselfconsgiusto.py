@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """montecarlo selfcons con r, r_0 ed energia libera"""
 
 import numpy as np
@@ -71,41 +70,7 @@ def monte_carlo_sampling(W_init, J, T, n_samples=1000, n_thermalization=500):
 
 
 def order_params_complete(W_init, J, T, eta, target_pattern_idx, n_samples=500, n_thermalization=40):
-    """
-    Calcola tutti i parametri d'ordine inclusi r, r_0 ed energia libera
-    
-    Parameters:
-    -----------
-    W_init : array (N,)
-        Configurazione iniziale
-    J : array (N,N)
-        Matrice sinaptica
-    T : float
-        Temperatura
-    eta : array (P, N)
-        Tutti i pattern
-    target_pattern_idx : int
-        Indice del pattern target
-    n_samples : int
-        Numero di campioni MC
-    n_thermalization : int
-        Sweep di termalizzazione
-    
-    Returns:
-    --------
-    fr : float
-        Energia libera
-    m : float
-        Overlap con pattern target
-    q0 : float
-        <V_i>
-    q : float
-        Correlazione tra campioni successivi
-    r : float
-        Overlap autocorrelazione
-    r0 : float
-        Overlap con pattern non-target
-    """
+
     N = len(W_init)
     P_total = eta.shape[0]
     beta = 1.0 / T
@@ -133,7 +98,7 @@ def order_params_complete(W_init, J, T, eta, target_pattern_idx, n_samples=500, 
     q0 = np.mean(q0_samples)
     
     # ==========================================
-    # Calcola q come correlazione tra campioni successivi
+    # Calcola q come correlazione tra campioni successivi!! (we can see the thermal average also as a temporal one)
     # ==========================================
     q_alt = 0
     for i in range(len(samples) - 1):
@@ -141,7 +106,7 @@ def order_params_complete(W_init, J, T, eta, target_pattern_idx, n_samples=500, 
     q = q_alt / (len(samples) - 1)
     
     # ==========================================
-    # Calcola r come autocorrelazione tra campioni successivi
+    # Calcola r come autocorrelazione tra campioni successivi 
     # (stesso metodo di q, ma con overlap invece di dot product)
     # ==========================================
     r_samples = []
@@ -155,7 +120,6 @@ def order_params_complete(W_init, J, T, eta, target_pattern_idx, n_samples=500, 
     
     # ==========================================
     # Calcola r0 = overlap con pattern non-target
-    # r0 = 1/(P-1) * Σ_{μ≠target} m_μ²
     # ==========================================
     m_other_patterns = []
     
@@ -176,10 +140,7 @@ def order_params_complete(W_init, J, T, eta, target_pattern_idx, n_samples=500, 
         m_other_patterns.append(m_mu_avg**2)
     
     r0 = np.mean(m_other_patterns)  # Media su tutti i pattern non-target
-    
-    # ==========================================
-    # Calcola energia libera
-    # ==========================================
+
     z = np.random.randn(10000)  # Campioni per integrazione
     
     # Campo H
@@ -336,23 +297,4 @@ plt.tight_layout()
 plt.savefig(f"complete_simulation_alpha={alpha:.2f}_lambda={lam:.2f}.png", dpi=150)
 plt.show()
 
-# ==========================================
-# Trova temperatura critica dal picco di C
-# ==========================================
-C_array = np.array(C_vals)
-T_c_idx = np.argmax(C_array)
-T_c = T_values[T_c_idx]
 
-print("\n" + "="*70)
-print("STATISTICHE FINALI:")
-print("="*70)
-print(f"Temperatura critica (da picco C): T_c ≈ {T_c:.4f}")
-print(f"Calore specifico massimo: C_max = {C_array[T_c_idx]:.4f}")
-print(f"Overlap a T_c: m(T_c) = {m_vals[T_c_idx]:.4f}")
-print(f"Energia a T_c: E(T_c) = {E_vals[T_c_idx]:.4f}")
-print()
-print(f"Overlap finale (T={T_values[-1]:.3f}): m = {m_vals[-1]:.4f}")
-print(f"q - q₀ medio: {np.mean(np.array(q_vals) - np.array(q0_vals)):.6f}")
-print(f"r - r₀ medio: {np.mean(np.array(r_vals) - np.array(r0_vals)):.6f}")
-print(f"Energia libera finale: f = {f_vals[-1]:.4f}")
-print(f"Energia finale: E = {E_vals[-1]:.4f}")
