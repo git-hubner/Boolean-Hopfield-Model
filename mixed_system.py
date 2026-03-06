@@ -1,3 +1,5 @@
+"""Follows the mixed state evolution over temperatures """
+
 import numpy as np
 from scipy.stats import norm
 import matplotlib.pyplot as plt
@@ -18,10 +20,10 @@ target_pattern = 100
 theta = 0.6
 lam = 0.65  # LAMBDA FISSATO
 
-# Range temperature (molte temperature per vedere l'evoluzione)
+# Range temperature
 T_range = np.linspace(0.001, 0.5, 50)
 
-# Range pattern da visualizzare
+# Range pattern around the target one
 pattern_range = range(50, 151)
 
 # File output
@@ -67,40 +69,14 @@ print("=" * 80)
 print("\nGenerazione pattern e matrice J...")
 eta = generate_patterns(P, N, lam, s_e, s_t, T_threshold)
 J = build_J_matrix(eta, f, N)
-print("✓ Completato")
-
-# Inizializza stato
-# ==================== COSTRUZIONE DI UNO STATO MISTO ====================
-# Parametri dello stato misto
+print(" Completato")
 
 
-# =============================
 # COSTRUZIONE DELLO STATO MISTO
-# =============================
-import numpy as np
 
 def make_weighted_mixed_pattern(eta, start=90, end=110, center=None, sigma=10.0,
                                 f=0.1, method='topk'):
-    """
-    Costruisce un mixed pattern binario come combinazione lineare dei pattern
-    eta[start:end+1], con pesi centrati in `center` (gaussiana) e attività = f.
 
-    Params
-    ------
-    eta : np.ndarray, shape (P, N)    # pattern storage
-    start, end : int                  # indice iniziale e finale (inclusi)
-    center : float or None            # centro della gaussiana (index). se None -> (start+end)/2
-    sigma : float                     # dev std della gaussiana dei pesi (in units di index)
-    f : float                         # activity target (fractions of neurons ON)
-    method : 'topk' or 'quantile'     # come ottenere activity f
-
-    Returns
-    -------
-    M_bin : np.ndarray (N,)           # mixed binary pattern (0/1) con activity ~ f (or exact f for topk)
-    S : np.ndarray (N,)               # somma pesata grezza (float)
-    w : np.ndarray (L,)               # pesi usati sui pattern (in ordine pattern_indices)
-    pattern_indices : list
-    """
     P, N = eta.shape
     pattern_indices = list(range(start, end+1))
     L = len(pattern_indices)
@@ -146,9 +122,6 @@ def make_weighted_mixed_pattern(eta, start=90, end=110, center=None, sigma=10.0,
 
     return M_bin, S, w, pattern_indices
 
-# ---------- Esempio d'uso ----------
-# supponendo eta definito (P x N), p/f dato
-# usa i pattern 90..110 (21 pattern) con pesi centrati su 100
 M, S, w, idxs = make_weighted_mixed_pattern(eta, start=90, end=110,
                                             center=100, sigma=10.0,
                                             f=0.1, method='quantile')
@@ -230,7 +203,7 @@ for idx, t in enumerate(T_range):
     with open(output_filename, 'a') as outfile:
         outfile.write(f"{t:10.6f} {m_99:12.6f} {m_100:12.6f} {m_101:12.6f} {q_0:12.6f}\n")
 
-print("✓ Dinamica completata\n")
+print(" Dinamica completata\n")
 
 # Converti in array numpy per plotting
 T_array = np.array(results['T'])
@@ -284,7 +257,7 @@ plt.suptitle(f'Spatial Profile Evolution | λ = {lam}, α = {alpha}',
 plt.tight_layout()
 plt.savefig(f'spatial_grid_lambda{lam:.2f}_{timestamp}.png', dpi=150, bbox_inches='tight')
 plt.show()
-print("✓ Salvato: spatial_grid_lambda{:.2f}_{}.png\n".format(lam, timestamp))
+print(" Salvato: spatial_grid_lambda{:.2f}_{}.png\n".format(lam, timestamp))
 
 # ==================== PLOT 2: HEATMAP 2D (Pattern vs Temperature) ====================
 print("Generazione plot 2: Heatmap 2D...")
@@ -323,7 +296,7 @@ ax.legend(loc='upper right', fontsize=12)
 plt.tight_layout()
 plt.savefig(f'heatmap_2d_lambda{lam:.2f}_{timestamp}.png', dpi=200, bbox_inches='tight')
 plt.show()
-print("✓ Salvato: heatmap_2d_lambda{:.2f}_{}.png\n".format(lam, timestamp))
+print(" Salvato: heatmap_2d_lambda{:.2f}_{}.png\n".format(lam, timestamp))
 
 # ==================== PLOT 3: EVOLUZIONE m_99, m_100, m_101 vs T ====================
 print("Generazione plot 3: Evoluzione magnetizzazioni centrali...")
@@ -365,9 +338,9 @@ plt.tight_layout()
 plt.savefig(f'magnetization_evolution_lambda{lam:.2f}_{timestamp}.png', 
            dpi=150, bbox_inches='tight')
 plt.show()
-print("✓ Salvato: magnetization_evolution_lambda{:.2f}_{}.png\n".format(lam, timestamp))
+print(" Salvato: magnetization_evolution_lambda{:.2f}_{}.png\n".format(lam, timestamp))
 
-# ==================== PLOT 4: PROFILI SPECIFICI (Temperature chiave) ====================
+# ==================== PLOT 4: PROFILI SPECIFICI ====================
 print("Generazione plot 4: Profili a temperature chiave...")
 
 # Identifica temperature chiave basate su m_100
@@ -421,11 +394,11 @@ plt.tight_layout()
 plt.savefig(f'key_profiles_lambda{lam:.2f}_{timestamp}.png', 
            dpi=150, bbox_inches='tight')
 plt.show()
-print("✓ Salvato: key_profiles_lambda{:.2f}_{}.png\n".format(lam, timestamp))
+print(" Salvato: key_profiles_lambda{:.2f}_{}.png\n".format(lam, timestamp))
 
 print("=" * 80)
 print("ANALISI COMPLETATA!")
 print("=" * 80)
-print(f"✓ File dati: {output_filename}")
-print(f"✓ 4 grafici salvati con timestamp: {timestamp}")
+print(f" File dati: {output_filename}")
+print(f" 4 grafici salvati con timestamp: {timestamp}")
 print("=" * 80)
