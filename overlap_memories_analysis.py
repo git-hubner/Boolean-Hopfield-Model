@@ -1,3 +1,5 @@
+"""Comparison with experimental data: retrieve one pattern at a time and then measure the correlation at each temperature"""
+"""Correlation measure: C_mu,nu = 1/N \sum_i W_i^mu(T)w_i^nu(T) """
 import numpy as np
 from scipy.stats import norm
 import matplotlib.pyplot as plt
@@ -38,15 +40,14 @@ def magn(Z, eta_p, f):
 def overlap_with_pattern(Z, eta_p):
     """
     Calcola l'overlap tra lo stato Z e il pattern eta_p.
-    Overlap = frazione di neuroni che hanno lo stesso valore in Z e eta_p
     """
     return np.sum(Z == eta_p) / len(Z)
 
 def overlap_active_neurons(Z, eta_p):
     """
-    Calcola l'overlap considerando SOLO i neuroni attivi.
+    Calcola l'overlap considerando SOLO i neuroni attivi. (imp!!)
     = (neuroni attivi sia in Z che in eta_p) / (neuroni attivi in Z OR eta_p)
-    Questa è più simile a un coefficiente di Jaccard
+    Tipo coefficiente di Jaccard
     """
     both_active = np.sum((Z == 1) & (eta_p == 1))
     either_active = np.sum((Z == 1) | (eta_p == 1))
@@ -203,7 +204,7 @@ for lam in lambda_values:
         with open(output_filename, 'a') as outfile:
             outfile.write("\n")
         
-        print(f"  ✓ Completato")
+        print(f"   Completato")
 
 print("\n" + "=" * 80)
 print("DINAMICA COMPLETATA - Generazione plot...")
@@ -243,7 +244,7 @@ for lam in lambda_values:
     plt.savefig(f'magnetizations_lambda{lam:.2f}_{timestamp}.png',
                dpi=150, bbox_inches='tight')
     plt.show()
-    print(f"✓ Salvato: magnetizations_lambda{lam:.2f}_{timestamp}.png")
+    print(f" Salvato: magnetizations_lambda{lam:.2f}_{timestamp}.png")
 
 # ==================== PLOT 2: OVERLAP ATTIVI vs T ====================
 for lam in lambda_values:
@@ -278,7 +279,7 @@ for lam in lambda_values:
     plt.savefig(f'overlap_active_lambda{lam:.2f}_{timestamp}.png',
                dpi=150, bbox_inches='tight')
     plt.show()
-    print(f"✓ Salvato: overlap_active_lambda{lam:.2f}_{timestamp}.png")
+    print(f" Salvato: overlap_active_lambda{lam:.2f}_{timestamp}.png")
 
 # ==================== PLOT 3: OVERLAP TOTALE vs T ====================
 for lam in lambda_values:
@@ -313,7 +314,7 @@ for lam in lambda_values:
     plt.savefig(f'overlap_total_lambda{lam:.2f}_{timestamp}.png',
                dpi=150, bbox_inches='tight')
     plt.show()
-    print(f"✓ Salvato: overlap_total_lambda{lam:.2f}_{timestamp}.png")
+    print(f" Salvato: overlap_total_lambda{lam:.2f}_{timestamp}.png")
 
 # ==================== PLOT 4: HEATMAP OVERLAP A TEMPERATURA FISSATA ====================
 # Seleziona alcune temperature chiave
@@ -368,11 +369,11 @@ for lam in lambda_values:
     plt.savefig(f'overlap_heatmap_lambda{lam:.2f}_{timestamp}.png',
                dpi=150, bbox_inches='tight')
     plt.show()
-    print(f"✓ Salvato: overlap_heatmap_lambda{lam:.2f}_{timestamp}.png")
+    print(f" Salvato: overlap_heatmap_lambda{lam:.2f}_{timestamp}.png")
 
 print("\n" + "=" * 80)
 print("ANALISI COMPLETATA!")
 print("=" * 80)
-print(f"✓ File dati: {output_filename}")
-print(f"✓ Plot generati: {3 * len(lambda_values) + len(lambda_values)} file")
+print(f" File dati: {output_filename}")
+print(f" Plot generati: {3 * len(lambda_values) + len(lambda_values)} file")
 print("=" * 80)
