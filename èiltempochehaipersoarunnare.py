@@ -94,7 +94,7 @@ def make_weighted_mixed_pattern(eta, start, end, center=None, sigma=10.0, f=0.1)
     for k, mu in enumerate(pattern_indices):
         S += w[k] * eta[mu]
     
-    # Top-k per mantenere sparsità f
+    # Top-k per mantenere sparsità f (imp, da cambiare!!)
     k = int(round(f * N))
     idx = np.argsort(S)
     sel = idx[-k:]
@@ -138,7 +138,7 @@ def run_single_realization(lam, alpha, realization_idx, output_dir):
         print(f"  ⚠ Warning: P={P} < {patterns_per_mixed}, skipping λ={lam:.2f}, α={alpha:.2f}")
         return None
     
-    print(f"\n  → λ={lam:.2f}, α={alpha:.2f}, Real={realization_idx+1}/{n_realizations}")
+    print(f"\n   λ={lam:.2f}, α={alpha:.2f}, Real={realization_idx+1}/{n_realizations}")
     print(f"     P = {P}")
     
     # Genera pattern originali
@@ -150,7 +150,7 @@ def run_single_realization(lam, alpha, realization_idx, output_dir):
     )
     
     if eta_new is None:
-        print(f"  ⚠ Warning: Cannot create mixed patterns, skipping")
+        print(f" Warning: Cannot create mixed patterns")
         return None
     
     print(f"     P_new = {P_new} mixed patterns created")
@@ -281,7 +281,7 @@ print("\n" + "=" * 80)
 print("GENERAZIONE PLOT AGGREGATI")
 print("=" * 80)
 
-# ==================== PLOT AGGREGATO 1: Heatmap m_target(T_low) vs λ,α ====================
+# ==================== PLOT 1: Heatmap m_target(T_low) vs λ,α ====================
 print("Generazione plot aggregato 1: Heatmap m_target a T bassa...")
 
 # Crea griglia per heatmap
@@ -332,7 +332,7 @@ plt.savefig(os.path.join(output_dir, 'heatmap_mtarget_low.png'),
 plt.close()
 print("✓ Salvato: heatmap_mtarget_low.png")
 
-# ==================== PLOT AGGREGATO 2: Heatmap m_target(T_high) vs λ,α ====================
+# ==================== PLOT 2: Heatmap m_target(T_high) vs λ,α ====================
 print("Generazione plot aggregato 2: Heatmap m_target a T alta...")
 
 m_target_high_grid = np.zeros((len(alpha_values), len(lambda_values)))
@@ -377,7 +377,7 @@ plt.savefig(os.path.join(output_dir, 'heatmap_mtarget_high.png'),
 plt.close()
 print("✓ Salvato: heatmap_mtarget_high.png")
 
-# ==================== PLOT AGGREGATO 3: m_target vs λ per diversi α ====================
+# ==================== PLOT 3: m_target vs λ per diversi α ====================
 print("Generazione plot aggregato 3: m_target vs λ...")
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 7))
