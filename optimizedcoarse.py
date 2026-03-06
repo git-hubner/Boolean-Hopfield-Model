@@ -14,10 +14,9 @@ T_threshold = norm.ppf(1 - f)
 # Parametri simulazione
 theta = 0.6
 
-# RANGE DI PARAMETRI DA ESPLORARE
-lambda_values = np.linspace(0, 0.9, 10)  # 0, 0.1, 0.2, ..., 0.9
-alpha_values = np.linspace(0.2, 0.6, 9)  # 0.2, 0.25, 0.3, ..., 0.6
-n_realizations = 2  # Realizzazioni per ogni combinazione
+lambda_values = np.linspace(0, 0.9, 10) 
+alpha_values = np.linspace(0.2, 0.6, 9) 
+n_realizations = 2 
 
 # Parametri stati misti
 patterns_per_mixed = 20  # Numero di pattern da combinare per ogni stato misto
