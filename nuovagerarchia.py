@@ -1,3 +1,5 @@
+"""commented coarse graining and retrieval of the mixed state procedure"""
+
 import numpy as np
 from scipy.stats import norm
 import matplotlib.pyplot as plt
@@ -103,10 +105,6 @@ def make_weighted_mixed_pattern(eta, start, end, center=None, sigma=10.0, f=0.1)
 def create_all_mixed_patterns(eta, patterns_per_mixed, f, sigma):
     """
     Crea P/patterns_per_mixed stati misti, ciascuno combinando patterns_per_mixed pattern consecutivi
-    
-    Returns:
-    - eta_new: array (P_new, N) con i nuovi pattern misti
-    - mixing_info: lista di dict con info su come ogni pattern misto è stato creato
     """
     P, N = eta.shape
     n_mixed = P // patterns_per_mixed
@@ -436,13 +434,4 @@ print("=" * 80)
 print("ANALISI COMPLETATA!")
 print("=" * 80)
 print(f"✓ Directory output: {output_dir}/")
-print(f"\nStatistiche finali:")
-print(f"  Pattern originali: {P}")
-print(f"  Pattern misti creati: {P_new}")
-print(f"  Target mixed pattern: {target_mixed_idx}")
-print(f"  m_target(T_low): {results['m_target'][0]:.4f}")
-print(f"  m_target(T_high): {results['m_target'][-1]:.4f}")
-print(f"\nFile generati:")
-print(f"  - 1 file .txt con dati retrieval")
-print(f"  - 4 plot (.png)")
-print("=" * 80)
+
