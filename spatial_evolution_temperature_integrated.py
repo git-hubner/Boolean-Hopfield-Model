@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import itertools
 
-# ==================== PARAMETRI GLOABLI ====================
+# ==================== PARAMETRI ====================
 N = 10000
 f = 0.1
 s_e = 0.7
@@ -17,7 +17,6 @@ T_range = np.linspace(0.001, 0.5, 50)
 # targets to test
 targets = list(range(97, 104))   # 97..103 inclusive
 
-# Experiment settings to sweep
 lambda_list = [0.6, 0.7, 0.75, 0.8]
 alpha_list = [0.05, 0.1, 0.2]
 
@@ -28,7 +27,6 @@ init_flip_fraction = 1/30   # same as original
 # Output timestamp
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-# ---------------- utilitarie ----------------
 
 def prob(h, tht, beta):
     with np.errstate(over='ignore'):
@@ -62,9 +60,7 @@ def build_J_matrix(eta, f, N):
 
 
 def run_retrieval_single(J, eta_pattern, theta, beta, steps=MC_steps):
-    """Run Glauber-like dynamics starting from a noisy copy of eta_pattern.
-    Returns final W (0/1 array).
-    """
+
     N = len(eta_pattern)
     W = eta_pattern.copy()
     flip_idx = np.random.choice(N, size=int(N * init_flip_fraction), replace=False)
@@ -78,7 +74,6 @@ def run_retrieval_single(J, eta_pattern, theta, beta, steps=MC_steps):
     return W
 
 
-# ---------------- main experiment ----------------
 
 all_results = {}
 
@@ -117,7 +112,6 @@ for lam in lambda_list:
                 # compute overlap m with its native pattern
                 mval = magn(Wmu, eta_mu, f)
                 all_results[key]['m'][mu].append(mval)
-            # global activity (we take activity of target 100's state as representative)
             all_results[key]['q0'].append(np.sum(W_dict[targets[0]]) / N)
 
             # compute pairwise simultaneous activation between Ws
@@ -137,7 +131,6 @@ for lam in lambda_list:
 
 print("All experiments completed.")
 
-# ---------------- optional plotting for one example ----------------
 # plot pair overlap heatmap for a chosen (lam,alpha)
 example_key = (0.75, 0.1) if (0.75, 0.1) in all_results else next(iter(all_results.keys()))
 res = all_results[example_key]
